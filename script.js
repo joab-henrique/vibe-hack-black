@@ -26,3 +26,23 @@ document.addEventListener('click', event => {
 matchMedia('(min-width: 901px)').addEventListener('change', event => {
   if (event.matches) closeMenu();
 });
+
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+  const groups = ['.section-heading', '.about > div', '.ancestry-art', '.ancestry-copy', '.cards', '.beginner', '.editions', '.join', '.faq > div', '.questions'];
+  const items = [];
+  groups.forEach(selector => document.querySelectorAll(selector).forEach(el => {
+    const children = el.matches('.cards, .editions, .questions') ? [...el.children] : [el];
+    children.forEach((child, i) => {
+      child.style.setProperty('--d', `${i * 0.1}s`);
+      child.classList.add('reveal');
+      items.push(child);
+    });
+  }));
+  const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in');
+      observer.unobserve(entry.target);
+    }
+  }), { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+  items.forEach(el => observer.observe(el));
+}
